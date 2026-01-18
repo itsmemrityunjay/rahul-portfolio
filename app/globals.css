@@ -133,15 +133,20 @@
 }
 
 @keyframes lanyardSwing {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateX(-50%) rotate(0deg);
   }
+
   25% {
     transform: translateX(-50%) rotate(1deg);
   }
+
   50% {
     transform: translateX(-50%) rotate(0deg);
   }
+
   75% {
     transform: translateX(-50%) rotate(-1deg);
   }
@@ -177,11 +182,52 @@
 }
 
 @keyframes floatBadge {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-10px);
+  }
+}
+
+/* Highlight text animation */
+.highlight-text {
+  position: relative;
+  display: inline-block;
+}
+
+.highlight-text::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 107, 74, 0.3), transparent);
+  transition: width 1.5s ease-out;
+  z-index: -1;
+}
+
+.highlight-text.highlighted::before {
+  width: 100%;
+  animation: highlightSweep 2s ease-out;
+}
+
+@keyframes highlightSweep {
+  0% {
+    width: 0;
+    left: 0;
+  }
+  50% {
+    width: 100%;
+    left: 0;
+  }
+  100% {
+    width: 0;
+    left: 100%;
   }
 }
 

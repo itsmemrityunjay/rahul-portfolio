@@ -1,11 +1,42 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
+
 export default function About() {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+    };
+  }, []);
+
   return (
-    <section className="relative min-h-screen bg-black text-white flex items-center justify-center px-8 lg:px-16 py-20">
+    <section 
+      ref={sectionRef}
+      className="relative min-h-screen bg-black text-white flex items-center justify-center px-8 lg:px-16 py-20"
+    >
       <div className="max-w-5xl w-full">
         {/* Hello! Heading */}
-        <div className="flex items-center justify-center gap-8 mb-16">
+        <div className={`flex items-center justify-center gap-8 mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="flex-1 h-[1px] bg-gray-700"></div>
           <h2 className="text-4xl lg:text-5xl font-serif italic text-gray-300">Hello!</h2>
           <div className="flex-1 h-[1px] bg-gray-700"></div>
@@ -14,7 +45,7 @@ export default function About() {
         {/* Main Content with Floating Badges */}
         <div className="relative">
           {/* Floating skill badges */}
-          <div className="floating-badge absolute top-[-40px] left-[5%] lg:left-[10%]">
+          <div className={`floating-badge absolute top-[-40px] left-[5%] lg:left-[10%] transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-20'}`}>
             <div className="flex items-center gap-3 bg-white/95 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg">
               <div className="w-8 h-8 bg-[#FF6B4A] rounded-lg flex items-center justify-center">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -28,7 +59,7 @@ export default function About() {
             </div>
           </div>
 
-          <div className="floating-badge absolute top-[80px] left-[0%] lg:left-[5%]">
+          <div className={`floating-badge absolute top-[80px] left-[0%] lg:left-[5%] transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-20'}`}>
             <div className="flex items-center gap-3 bg-white/95 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg">
               <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -39,7 +70,7 @@ export default function About() {
             </div>
           </div>
 
-          <div className="floating-badge absolute top-[180px] left-[2%] lg:left-[8%]">
+          <div className={`floating-badge absolute top-[180px] left-[2%] lg:left-[8%] transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-20'}`}>
             <div className="flex items-center gap-3 bg-white/95 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg">
               <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -51,7 +82,7 @@ export default function About() {
             </div>
           </div>
 
-          <div className="floating-badge absolute top-[-50px] right-[8%] lg:right-[12%]">
+          <div className={`floating-badge absolute top-[-50px] right-[8%] lg:right-[12%] transition-all duration-700 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-20'}`}>
             <div className="flex items-center gap-3 bg-white/95 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg">
               <div className="w-8 h-8 bg-green-400 rounded-lg flex items-center justify-center">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -62,7 +93,7 @@ export default function About() {
             </div>
           </div>
 
-          <div className="floating-badge absolute top-[90px] right-[2%] lg:right-[5%]">
+          <div className={`floating-badge absolute top-[90px] right-[2%] lg:right-[5%] transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-20'}`}>
             <div className="flex items-center gap-3 bg-white/95 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg">
               <div className="w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -74,7 +105,7 @@ export default function About() {
             </div>
           </div>
 
-          <div className="floating-badge absolute top-[190px] right-[5%] lg:right-[10%]">
+          <div className={`floating-badge absolute top-[190px] right-[5%] lg:right-[10%] transition-all duration-700 delay-600 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-20'}`}>
             <div className="flex items-center gap-3 bg-white/95 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg">
               <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -87,13 +118,13 @@ export default function About() {
           </div>
 
           {/* Main Text */}
-          <div className="text-center px-4 py-8">
+          <div className={`text-center px-4 py-8 transition-all duration-1000 delay-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <p className="text-2xl lg:text-4xl font-light leading-relaxed">
               <span className="text-white">I&apos;m a Product and UX Designer with </span>
-              <span className="text-white font-medium">1+ years of experience</span>
+              <span className={`text-white font-medium highlight-text ${isVisible ? 'highlighted' : ''}`}>1+ years of experience</span>
               <br />
               <span className="text-white">and </span>
-              <span className="text-white font-medium">3+ live projects</span>
+              <span className={`text-white font-medium highlight-text ${isVisible ? 'highlighted' : ''}`}>3+ live projects</span>
               <span className="text-white"> — </span>
               <span className="text-gray-500">creating digital products that blend</span>
               <br />
