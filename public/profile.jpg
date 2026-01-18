@@ -1,0 +1,11 @@
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="400" fill="#2a2a2a"/>
+  <circle cx="200" cy="150" r="60" fill="#555"/>
+  <path d="M 100 280 Q 200 220 300 280 L 300 400 L 100 400 Z" fill="#555"/>
+  <text x="200" y="350" font-family="Arial" font-size="14" fill="#888" text-anchor="middle">
+    Replace with your photo
+  </text>
+  <text x="200" y="370" font-family="Arial" font-size="12" fill="#666" text-anchor="middle">
+    Add profile.jpg to /public folder
+  </text>
+</svg>
