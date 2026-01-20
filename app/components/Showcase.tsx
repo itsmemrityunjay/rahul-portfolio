@@ -114,14 +114,37 @@ export default function Showcase() {
   }, []);
 
   const totalCards = projects.length;
-  const progressPerCard = 1 / (totalCards + 1);
+  const progressPerCard = 1 / (totalCards + 8); // Cards appear much sooner
 
-  // Showcase title and gradient shrink gradually until first card appears
-  const showcaseProgress = Math.min(1, scrollProgress / (progressPerCard * 1.5));
-  const titleScale = Math.max(0.3, 1 - showcaseProgress * 0.7);
-  const titleOpacity = Math.max(0, 1 - showcaseProgress * 1.2);
-  const gradientScale = Math.max(0, 1 - showcaseProgress * 0.8);
-  const gradientOpacity = Math.max(0, 1 - showcaseProgress * 0.9);
+  // Showcase title and gradient: grow from bottom to center, then shrink
+  // Use separate timing for showcase text (not tied to progressPerCard)
+  const showcaseProgress = Math.min(1, scrollProgress / 0.3); // Independent showcase timing - more scroll to reach center
+  
+  // Entry phase: scale up from 0.3 to 1 as it enters from bottom and reaches center
+  // Stay at center, then shrink as cards appear
+  let titleScale, titleOpacity, gradientScale, gradientOpacity;
+  
+  if (showcaseProgress < 0.55) {
+    // Growing phase: 0 to 0.55 progress - text grows until reaching center
+    const growProgress = showcaseProgress / 0.55;
+    titleScale = 0.3 + (growProgress * 0.7); // Scale from 0.3 to 1
+    titleOpacity = Math.min(1, growProgress * 1.3); // Fade in smoothly
+    gradientScale = 0.3 + (growProgress * 0.7); // Scale from 0.3 to 1
+    gradientOpacity = Math.min(0.9, growProgress * 1.3); // Fade in smoothly
+  } else if (showcaseProgress < 0.65) {
+    // At center phase: 0.55 to 0.65 - stay at full size at center
+    titleScale = 1;
+    titleOpacity = 1;
+    gradientScale = 1;
+    gradientOpacity = 0.9;
+  } else {
+    // Shrinking phase: 0.65 to 1 progress - shrink after staying at center
+    const shrinkProgress = (showcaseProgress - 0.65) / 0.35;
+    titleScale = Math.max(0.2, 1 - shrinkProgress * 0.8);
+    titleOpacity = Math.max(0, 1 - shrinkProgress * 1.3);
+    gradientScale = Math.max(0, 1 - shrinkProgress * 1);
+    gradientOpacity = Math.max(0, 0.9 - shrinkProgress * 0.9);
+  }
 
   return (
     <section 
@@ -164,38 +187,60 @@ export default function Showcase() {
 
         {/* Project Cards */}
         {projects.map((project, index) => {
-          const cardStartProgress = progressPerCard * (index + 1);
-          const cardEndProgress = progressPerCard * (index + 2);
+          // Add delay for first card only
+          const firstCardDelay = index === 0 ? 3 : 0;
+          const cardStartProgress = progressPerCard * (index + 1 + firstCardDelay);
+          const cardEndProgress = progressPerCard * (index + 2 + firstCardDelay);
           
           const cardLocalProgress = (scrollProgress - cardStartProgress) / (cardEndProgress - cardStartProgress);
           
-          // Entry: 0 to 0.3
-          const entryProgress = Math.max(0, Math.min(1, cardLocalProgress / 0.3));
-          // Exit: 0.7 to 1
-          const exitProgress = Math.max(0, Math.min(1, (cardLocalProgress - 0.7) / 0.3));
-          
-          let cardY = 120;
+          // Calculate card position and opacity
+          let cardY = 100; // Start from bottom (100vh)
           let cardOpacity = 0;
+          let cardScale = 0.95;
           
-          if (cardLocalProgress > 0 && cardLocalProgress <= 0.3) {
-            cardY = 120 * (1 - entryProgress);
+          if (cardLocalProgress < 0) {
+            // Card hasn't entered yet - keep it below
+            cardY = 100;
+            cardOpacity = 0;
+            cardScale = 0.95;
+          } else if (cardLocalProgress <= 0.4) {
+            // Card is entering from bottom (0 to 0.4 progress)
+            const entryProgress = cardLocalProgress / 0.4;
+            cardY = 100 * (1 - entryProgress);
             cardOpacity = entryProgress;
-          } else if (cardLocalProgress > 0.3 && cardLocalProgress <= 0.7) {
+            cardScale = 0.95 + (entryProgress * 0.05); // Scale from 0.95 to 1
+          } else {
+            // Card reached center and stays there - no more movement
             cardY = 0;
-            cardOpacity = 1;
-          } else if (cardLocalProgress > 0.7) {
-            cardY = -80 * exitProgress;
-            cardOpacity = 1 - exitProgress;
+            cardScale = 1;
+            
+            // Check if next card is coming - if so, fade out current card while it stays in place
+            const nextCardStartProgress = progressPerCard * (index + 2);
+            const nextCardLocalProgress = (scrollProgress - nextCardStartProgress) / (cardEndProgress - cardStartProgress);
+            
+            if (nextCardLocalProgress > 0 && nextCardLocalProgress <= 0.4) {
+              // Next card is entering (first 40% of its journey), fade out current card
+              const fadeProgress = nextCardLocalProgress / 0.4;
+              cardOpacity = 1 - fadeProgress;
+            } else if (nextCardLocalProgress > 0.4) {
+              // Next card has fully appeared, this card is gone
+              cardOpacity = 0;
+            } else {
+              // No next card yet, stay fully visible
+              cardOpacity = 1;
+            }
           }
           
-          // Internal reveal
-          const revealProgress = Math.max(0, Math.min(1, (cardLocalProgress - 0.3) / 0.15));
+          // Internal reveal for text and image
+          const revealProgress = Math.max(0, Math.min(1, (cardLocalProgress - 0.2) / 0.2));
           const textY = 16 * (1 - revealProgress);
           const textOpacity = revealProgress;
-          const imageY = 24 * (1 - Math.max(0, Math.min(1, (cardLocalProgress - 0.32) / 0.15)));
-          const imageOpacity = Math.max(0, Math.min(1, (cardLocalProgress - 0.32) / 0.15));
+          const imageY = 24 * (1 - Math.max(0, Math.min(1, (cardLocalProgress - 0.25) / 0.2)));
+          const imageOpacity = Math.max(0, Math.min(1, (cardLocalProgress - 0.25) / 0.2));
           
-          if (cardLocalProgress < -0.1 || cardLocalProgress > 1.1) return null;
+          // Only render if card has some visibility
+          if (cardLocalProgress < -0.1 || cardOpacity <= 0) return null;
           
           return (
             <div 
@@ -203,14 +248,14 @@ export default function Showcase() {
               className="absolute inset-0 flex items-center justify-center px-6 lg:px-12"
               style={{
                 opacity: cardOpacity,
-                transform: `translateY(${cardY}px)`,
-                transition: 'transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1)',
+                transform: `translateY(${cardY}%) scale(${cardScale})`,
+                transition: 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
                 zIndex: 20 + index,
               }}
             >
-              <div className="w-full max-w-6xl">
-                <div className="bg-[#0c0c0c] border border-gray-800/50 rounded-xl overflow-hidden">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+              <div className="w-full max-w-6xl h-[80vh]">
+                <div className="bg-black border border-gray-800/50 rounded-xl overflow-hidden h-full">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 h-full">
                     {/* Left - Text */}
                     <div 
                       className="p-8 lg:p-12 flex flex-col justify-center"
@@ -250,7 +295,7 @@ export default function Showcase() {
 
                     {/* Right - Image */}
                     <div 
-                      className="relative h-[280px] lg:h-[420px] bg-[#111]"
+                      className="relative h-full bg-[#111]"
                       style={{
                         opacity: imageOpacity,
                         transform: `translateY(${imageY}px)`,
