@@ -57,6 +57,9 @@ export default function Hero() {
           patternAlpha={30}
         />
       </div>
+
+      {/* Bottom gradient fade */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black via-black/70 to-transparent z-10" />
       
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 px-4 sm:px-8 lg:px-16 py-4 sm:py-6 flex justify-between items-center">
@@ -84,7 +87,7 @@ export default function Hero() {
       </nav>
 
       {/* Hero Content */}
-      <div className="flex items-center justify-center min-h-screen px-4 sm:px-8 lg:px-16">
+      <div className="relative z-20 flex items-center justify-center min-h-screen px-4 sm:px-8 lg:px-16">
         <div className="relative w-full max-w-[1400px]">
           {/* Small intro text */}
           <div className="absolute top-[-10px] sm:top-[-20px] left-0 text-[#FF6B4A] text-xs sm:text-sm lg:text-base font-medium">
