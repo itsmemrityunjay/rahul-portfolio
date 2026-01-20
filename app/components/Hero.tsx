@@ -59,7 +59,7 @@ export default function Hero() {
       </div>
 
       {/* Bottom gradient fade */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black via-black/70 to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-60 bg-gradient-to-t from-black via-black/70 to-transparent z-10" />
       
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 px-4 sm:px-8 lg:px-16 py-4 sm:py-6 flex justify-between items-center">
