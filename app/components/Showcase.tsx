@@ -187,10 +187,9 @@ export default function Showcase() {
 
         {/* Project Cards */}
         {projects.map((project, index) => {
-          // Add delay for first card only
-          const firstCardDelay = index === 0 ? 3 : 0;
-          const cardStartProgress = progressPerCard * (index + 1 + firstCardDelay);
-          const cardEndProgress = progressPerCard * (index + 2 + firstCardDelay);
+          // Cards appear without delay
+          const cardStartProgress = progressPerCard * (index + 1);
+          const cardEndProgress = progressPerCard * (index + 2);
           
           const cardLocalProgress = (scrollProgress - cardStartProgress) / (cardEndProgress - cardStartProgress);
           
@@ -253,7 +252,7 @@ export default function Showcase() {
                 zIndex: 20 + index,
               }}
             >
-              <div className="w-full max-w-6xl h-[80vh]">
+              <div className="w-full max-w-7xl h-[80vh]">
                 <div className="bg-black border border-gray-800/50 rounded-xl overflow-hidden h-full">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 h-full">
                     {/* Left - Text */}

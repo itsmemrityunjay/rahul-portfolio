@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { CometCard } from "@/components/ui/comet-card";
+import Noise from '@/components/Noise'
 
 
 export default function Hero() {
@@ -38,7 +39,7 @@ export default function Hero() {
 
   return (
     <div className="relative min-h-screen bg-black text-white overflow-hidden">
-      {/* Background Image */}
+      {/* Background Image with Noise */}
       <div className="absolute inset-0 z-0 opacity-70">
         <Image
           src="/background.jpg"
@@ -48,6 +49,13 @@ export default function Hero() {
           priority
         />
         <div className="absolute inset-0 bg-black/40" />
+        <Noise
+          patternSize={150}
+          patternScaleX={3}
+          patternScaleY={2}
+          patternRefreshInterval={2}
+          patternAlpha={30}
+        />
       </div>
       
       {/* Navigation */}
