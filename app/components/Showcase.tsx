@@ -114,7 +114,7 @@ export default function Showcase() {
   }, []);
 
   const totalCards = projects.length;
-  const progressPerCard = 1 / (totalCards + 8); // Cards appear much sooner
+  const progressPerCard = 1 / (totalCards + 4); // Cards appear much sooner
 
   // Showcase title and gradient: grow from bottom to center, then shrink
   // Use separate timing for showcase text (not tied to progressPerCard)
