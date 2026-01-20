@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 
 const projects = [
@@ -161,25 +162,32 @@ export default function Showcase() {
           className="absolute inset-0 w-full h-full"
           style={{
             opacity: gradientOpacity,
-            transform: `scale(${gradientScale})`,
+            transform: `scale(${gradientScale}) translateZ(0)`,
             transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
+            willChange: 'transform, opacity',
           }}
         />
+
+        {/* Soft spotlight behind Showcase title */}
+        <div className="pointer-events-none absolute inset-0 z-[5] flex items-center justify-center">
+          <div className="h-[45vh] w-[45vw] max-w-4xl max-h-[420px] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06),rgba(255,255,255,0.015),transparent_55%)] blur-3xl" />
+        </div>
 
         {/* Showcase Title - shrinks gradually */}
         <div 
           className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"
           style={{
             opacity: titleOpacity,
-            transform: `scale(${titleScale})`,
+            transform: `scale(${titleScale}) translateZ(0)`,
             transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
+            willChange: 'transform, opacity',
           }}
         >
           <div className="text-center px-8">
             <h2 className="text-6xl lg:text-8xl xl:text-[10rem] font-serif mb-6 tracking-tight text-white">
-              Showcase
+              Projects!
             </h2>
-            <p className="text-lg lg:text-xl text-gray-400 font-light">
+            <p className="text-lg lg:text-xl font-light">
               Scroll through a curation of my best works
             </p>
           </div>
@@ -247,21 +255,24 @@ export default function Showcase() {
               className="absolute inset-0 flex items-center justify-center px-6 lg:px-12"
               style={{
                 opacity: cardOpacity,
-                transform: `translateY(${cardY}%) scale(${cardScale})`,
+                transform: `translate3d(0, ${cardY}%, 0) scale(${cardScale})`,
                 transition: 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
                 zIndex: 20 + index,
+                willChange: 'transform, opacity',
               }}
             >
-              <div className="w-full max-w-7xl h-[80vh]">
-                <div className="bg-black border border-gray-800/50 rounded-xl overflow-hidden h-full">
+              <div className="relative w-full max-w-7xl h-[80vh]">
+                <div className="pointer-events-none absolute inset-[-28px] rounded-[32px] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.16),rgba(255,255,255,0.06),transparent_60%)] blur-2xl opacity-90" />
+                <div className="bg-black border border-white/40 rounded-xl overflow-hidden h-full shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 h-full">
                     {/* Left - Text */}
                     <div 
                       className="p-8 lg:p-12 flex flex-col justify-center"
                       style={{
                         opacity: textOpacity,
-                        transform: `translateY(${textY}px)`,
+                        transform: `translateY(${textY}px) translateZ(0)`,
                         transition: 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+                        willChange: 'transform, opacity',
                       }}
                     >
                       <h3 className="text-2xl lg:text-3xl font-semibold text-white mb-2">
@@ -294,20 +305,34 @@ export default function Showcase() {
 
                     {/* Right - Image */}
                     <div 
-                      className="relative h-full bg-[#111]"
+                      className="relative h-full bg-[#111] overflow-hidden"
                       style={{
                         opacity: imageOpacity,
                         transform: `translateY(${imageY}px)`,
                         transition: 'transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1)',
                       }}
                     >
-                      <div className="absolute inset-0 flex items-center justify-center p-6">
-                        <div className="w-full h-full rounded-lg overflow-hidden bg-[#1a1a1a] border border-gray-800/30 flex items-center justify-center">
-                          <svg className="w-16 h-16 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
+                      {project.id === 1 ? (
+                        <>
+                          <Image
+                            src="/project1.png"
+                            alt="Adobe Firefly Contributor Portal preview"
+                            fill
+                            className="object-cover border"
+                            sizes="(min-width: 1024px) 50vw, 100vw"
+                            priority
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent" />
+                        </>
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center p-6">
+                          <div className="w-full h-full rounded-lg overflow-hidden bg-[#1a1a1a] border border-gray-800/30 flex items-center justify-center">
+                            <svg className="w-16 h-16 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 </div>

@@ -34,7 +34,7 @@ export default function TechStack() {
   };
 
   return (
-    <section className=" bg-black/95 border-t border-b  border-[#fb978344] py-3 text-white ">
+    <section className=" bg-black/95 border-t border-b  border-[#95959544]  py-3 text-white ">
       <div className="">
        
         

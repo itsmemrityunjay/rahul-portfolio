@@ -69,7 +69,7 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
 
     gsap.fromTo(
       wordElements,
-      { opacity: baseOpacity, willChange: 'opacity', color: '##333333' },
+      { opacity: baseOpacity, willChange: 'opacity', color: '#C4C4C4' },
       {
         ease: 'none',
         opacity: 1,

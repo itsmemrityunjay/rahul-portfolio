@@ -5,9 +5,10 @@ import Showcase from "./components/Showcase";
 
 export default function Home() {
   return (
-    <div>
+    <div className="bg-black  min-h-screen">
       <Hero />
-      <TechStack />
+      <div className="pt-10 "><TechStack /></div>
+      
       <About />
       <Showcase />
     </div>

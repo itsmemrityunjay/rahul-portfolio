@@ -35,7 +35,7 @@ export default function About() {
   return (
     <section 
       ref={sectionRef}
-      className="relative min-h-screen bg-black text-white flex items-center justify-center px-8 lg:px-16 "
+      className="relative pt-30 bg-black text-white flex items-center justify-center px-8 lg:px-16 "
     >
       <div className="w-full">
         {/* Hello! Heading */}
