@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
 
 const projects = [
   {
@@ -9,21 +8,18 @@ const projects = [
     title: 'Adobe Firefly Contributor Portal',
     category: 'Product Design',
     description: 'The project explores the development process of generative AI and aims to improve the process by making data and feedback collection easier for the developers while engaging users in doing so.',
-    image: '/project1.jpg',
   },
   {
     id: 2,
     title: 'Digital Spirometry App',
     category: 'Healthcare UX',
     description: 'A comprehensive mobile application for respiratory health monitoring, featuring real-time spirometry tests, result tracking, and personalized health insights for patients.',
-    image: '/project2.jpg',
   },
   {
     id: 3,
     title: 'Projector HMI',
     category: 'Interaction Design',
     description: 'A Human Machine Interaction project aimed at enhancing the projecting experience by creating an intuitive and easy-to-use interface.',
-    image: '/project3.jpg',
   },
 ];
 
@@ -32,6 +28,7 @@ export default function Showcase() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
 
+  // Animated gradient canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -47,39 +44,43 @@ export default function Showcase() {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Draw animated gradient orb
     let frame = 0;
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
-      const baseRadius = Math.min(canvas.width, canvas.height) * 0.65;
+      const radiusX = Math.min(canvas.width, canvas.height) * 0.8;
+      const radiusY = Math.min(canvas.width, canvas.height) * 0.35;
 
-      // Apply blur effect
       ctx.filter = 'blur(80px)';
 
-      // Create multiple gradient layers for depth
       for (let i = 0; i < 3; i++) {
-        const radius = baseRadius + Math.sin(frame * 0.01 + i) * 40;
+        const animOffset = Math.sin(frame * 0.01 + i) * 20;
+        const currentRadiusX = radiusX + animOffset;
+        const currentRadiusY = radiusY + animOffset;
+
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.scale(currentRadiusX / currentRadiusY, 1);
+        
         const gradient = ctx.createRadialGradient(
-          centerX, centerY, radius * 0.1,
-          centerX, centerY, radius
+          0, 0, currentRadiusY * 0.1,
+          0, 0, currentRadiusY
         );
 
-        // Orange gradient (#ff6445 and lighter variations)
+        // Orange gradient
         gradient.addColorStop(0, `rgba(255, 150, 120, ${0.9 - i * 0.2})`);
         gradient.addColorStop(0.3, `rgba(255, 100, 69, ${0.7 - i * 0.15})`);
         gradient.addColorStop(0.6, `rgba(200, 70, 50, ${0.4 - i * 0.1})`);
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
         ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(-canvas.width, -canvas.height, canvas.width * 2, canvas.height * 2);
+        ctx.restore();
       }
 
-      // Reset filter
       ctx.filter = 'none';
-
       frame++;
       requestAnimationFrame(animate);
     };
@@ -99,7 +100,6 @@ export default function Showcase() {
       const sectionHeight = sectionRef.current.offsetHeight;
       const windowHeight = window.innerHeight;
       
-      // Calculate progress based on how much of the section has been scrolled
       const scrolled = windowHeight - rect.top;
       const totalScrollable = sectionHeight;
       const progress = Math.max(0, Math.min(1, scrolled / totalScrollable));
@@ -107,42 +107,49 @@ export default function Showcase() {
       setScrollProgress(progress);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Calculate animations based on scroll progress
-  const titleScale = Math.max(0.5, 1 - scrollProgress * 1.5);
-  const titleOpacity = Math.max(0, 1 - scrollProgress * 2.5);
-  const titleY = scrollProgress * -150;
-  const showCards = scrollProgress > 0.1;
-  const cardsOpacity = Math.min(1, (scrollProgress - 0.1) * 3);
+  const totalCards = projects.length;
+  const progressPerCard = 1 / (totalCards + 1);
+
+  // Showcase title and gradient shrink gradually until first card appears
+  const showcaseProgress = Math.min(1, scrollProgress / (progressPerCard * 1.5));
+  const titleScale = Math.max(0.3, 1 - showcaseProgress * 0.7);
+  const titleOpacity = Math.max(0, 1 - showcaseProgress * 1.2);
+  const gradientScale = Math.max(0, 1 - showcaseProgress * 0.8);
+  const gradientOpacity = Math.max(0, 1 - showcaseProgress * 0.9);
 
   return (
     <section 
       ref={sectionRef}
-      className="relative bg-black text-white overflow-hidden"
-      style={{ minHeight: `${100 + projects.length * 100}vh` }}
+      className="relative bg-black text-white"
+      style={{ minHeight: `${(totalCards + 2) * 100}vh` }}
     >
       {/* Sticky container */}
       <div className="sticky top-0 h-screen overflow-hidden">
+        
         {/* Animated gradient background */}
         <canvas
           ref={canvasRef}
           className="absolute inset-0 w-full h-full"
           style={{
-            opacity: Math.max(0.3, 0.8 - scrollProgress),
+            opacity: gradientOpacity,
+            transform: `scale(${gradientScale})`,
+            transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
           }}
         />
 
-        {/* Showcase Title - Zooms out and fades */}
+        {/* Showcase Title - shrinks gradually */}
         <div 
           className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"
           style={{
-            transform: `scale(${titleScale}) translateY(${titleY}px)`,
             opacity: titleOpacity,
+            transform: `scale(${titleScale})`,
+            transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
           }}
         >
           <div className="text-center px-8">
@@ -155,106 +162,115 @@ export default function Showcase() {
           </div>
         </div>
 
-        {/* Project Cards Container */}
-        {showCards && (
-          <div 
-            className="absolute inset-0 flex items-center justify-center px-4 lg:px-8"
-            style={{ opacity: cardsOpacity }}
-          >
-            <div className="relative w-full max-w-5xl">
-              {projects.map((project, index) => {
-                // Calculate individual card animations
-                const cardStartProgress = 0.15 + index * 0.25;
-                const cardProgress = Math.max(0, Math.min(1, (scrollProgress - cardStartProgress) * 4));
-                const nextCardProgress = Math.max(0, Math.min(1, (scrollProgress - cardStartProgress - 0.25) * 4));
-                
-                // Card transforms
-                const cardY = (1 - cardProgress) * 100 + nextCardProgress * -50;
-                const cardScale = 1 - nextCardProgress * 0.05;
-                const cardOpacity = cardProgress - nextCardProgress * 0.3;
-                const cardZ = index * 10;
-                
-                if (cardProgress <= 0) return null;
+        {/* Project Cards */}
+        {projects.map((project, index) => {
+          const cardStartProgress = progressPerCard * (index + 1);
+          const cardEndProgress = progressPerCard * (index + 2);
+          
+          const cardLocalProgress = (scrollProgress - cardStartProgress) / (cardEndProgress - cardStartProgress);
+          
+          // Entry: 0 to 0.3
+          const entryProgress = Math.max(0, Math.min(1, cardLocalProgress / 0.3));
+          // Exit: 0.7 to 1
+          const exitProgress = Math.max(0, Math.min(1, (cardLocalProgress - 0.7) / 0.3));
+          
+          let cardY = 120;
+          let cardOpacity = 0;
+          
+          if (cardLocalProgress > 0 && cardLocalProgress <= 0.3) {
+            cardY = 120 * (1 - entryProgress);
+            cardOpacity = entryProgress;
+          } else if (cardLocalProgress > 0.3 && cardLocalProgress <= 0.7) {
+            cardY = 0;
+            cardOpacity = 1;
+          } else if (cardLocalProgress > 0.7) {
+            cardY = -80 * exitProgress;
+            cardOpacity = 1 - exitProgress;
+          }
+          
+          // Internal reveal
+          const revealProgress = Math.max(0, Math.min(1, (cardLocalProgress - 0.3) / 0.15));
+          const textY = 16 * (1 - revealProgress);
+          const textOpacity = revealProgress;
+          const imageY = 24 * (1 - Math.max(0, Math.min(1, (cardLocalProgress - 0.32) / 0.15)));
+          const imageOpacity = Math.max(0, Math.min(1, (cardLocalProgress - 0.32) / 0.15));
+          
+          if (cardLocalProgress < -0.1 || cardLocalProgress > 1.1) return null;
+          
+          return (
+            <div 
+              key={project.id}
+              className="absolute inset-0 flex items-center justify-center px-6 lg:px-12"
+              style={{
+                opacity: cardOpacity,
+                transform: `translateY(${cardY}px)`,
+                transition: 'transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1)',
+                zIndex: 20 + index,
+              }}
+            >
+              <div className="w-full max-w-6xl">
+                <div className="bg-[#0c0c0c] border border-gray-800/50 rounded-xl overflow-hidden">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+                    {/* Left - Text */}
+                    <div 
+                      className="p-8 lg:p-12 flex flex-col justify-center"
+                      style={{
+                        opacity: textOpacity,
+                        transform: `translateY(${textY}px)`,
+                        transition: 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+                      }}
+                    >
+                      <h3 className="text-2xl lg:text-3xl font-semibold text-white mb-2">
+                        {project.title}
+                      </h3>
+                      <p className="text-gray-500 text-sm uppercase tracking-wider mb-6">
+                        {project.category}
+                      </p>
+                      <p className="text-gray-400 text-base lg:text-lg leading-relaxed mb-8">
+                        {project.description}
+                      </p>
+                      <a 
+                        href="#" 
+                        className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors w-fit group"
+                      >
+                        <span className="text-sm font-medium">Full Project</span>
+                        <svg 
+                          width="16" 
+                          height="16" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2"
+                          className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                        >
+                          <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                        </svg>
+                      </a>
+                    </div>
 
-                return (
-                  <div
-                    key={project.id}
-                    className="absolute inset-0 transition-transform duration-100"
-                    style={{
-                      transform: `translateY(${cardY}px) scale(${cardScale})`,
-                      opacity: Math.max(0, cardOpacity),
-                      zIndex: cardZ,
-                    }}
-                  >
-                    <div className="bg-[#111] border border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
-                      {/* Project Preview Image */}
-                      <div className="relative w-full h-[300px] lg:h-[400px] bg-gray-900 overflow-hidden">
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="relative w-full h-full">
-                            <Image
-                              src={project.image}
-                              alt={project.title}
-                              fill
-                              className="object-cover"
-                              onError={(e) => {
-                                // Fallback placeholder
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                              }}
-                            />
-                            {/* Fallback gradient */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-purple-900/50 to-gray-900 flex items-center justify-center">
-                              <span className="text-gray-500 text-lg">Project Preview</span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {/* Side decorative bars */}
-                        <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-black/80 to-transparent"></div>
-                        <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-black/80 to-transparent"></div>
-                      </div>
-
-                      {/* Project Info */}
-                      <div className="p-6 lg:p-8 bg-[#0a0a0a]">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h3 className="text-2xl lg:text-3xl font-bold text-white mb-2">
-                              {project.title}
-                            </h3>
-                            <p className="text-gray-500 text-sm uppercase tracking-wider mb-4">
-                              {project.category}
-                            </p>
-                            <p className="text-gray-400 text-base lg:text-lg leading-relaxed max-w-2xl">
-                              {project.description}
-                            </p>
-                          </div>
-                          <a 
-                            href="#" 
-                            className="flex items-center gap-2 text-white hover:text-[#FF6B4A] transition-colors ml-8 shrink-0"
-                          >
-                            <span className="text-sm font-medium">Full Project</span>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M7 17L17 7M17 7H7M17 7V17"/>
-                            </svg>
-                          </a>
+                    {/* Right - Image */}
+                    <div 
+                      className="relative h-[280px] lg:h-[420px] bg-[#111]"
+                      style={{
+                        opacity: imageOpacity,
+                        transform: `translateY(${imageY}px)`,
+                        transition: 'transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1)',
+                      }}
+                    >
+                      <div className="absolute inset-0 flex items-center justify-center p-6">
+                        <div className="w-full h-full rounded-lg overflow-hidden bg-[#1a1a1a] border border-gray-800/30 flex items-center justify-center">
+                          <svg className="w-16 h-16 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
                         </div>
                       </div>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              </div>
             </div>
-          </div>
-        )}
-
-        {/* Scroll indicator - only show when title is visible */}
-        {titleOpacity > 0.5 && (
-          <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 animate-bounce z-20">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="opacity-50">
-              <path d="M12 5v14M5 12l7 7 7-7"/>
-            </svg>
-          </div>
-        )}
+          );
+        })}
       </div>
     </section>
   );
