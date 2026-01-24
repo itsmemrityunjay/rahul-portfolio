@@ -56,8 +56,8 @@ uniform vec3 lineGradient[8];
 uniform int lineGradientCount;
 
 const vec3 BLACK = vec3(0.0);
-const vec3 PINK  = vec3(233.0, 71.0, 245.0) / 255.0;
-const vec3 BLUE  = vec3(47.0,  75.0, 162.0) / 255.0;
+const vec3 CORAL  = vec3(255.0, 107.0, 74.0) / 255.0;
+const vec3 CORAL_DARK  = vec3(139.0, 58.0, 42.0) / 255.0;
 
 mat2 rotate(float r) {
   return mat2(cos(r), sin(r), -sin(r), cos(r));
@@ -69,8 +69,8 @@ vec3 background_color(vec2 uv) {
   float y = sin(uv.x - 0.2) * 0.3 - 0.1;
   float m = uv.y - y;
 
-  col += mix(BLUE, BLACK, smoothstep(0.0, 1.0, abs(m)));
-  col += mix(PINK, BLACK, smoothstep(0.0, 1.0, abs(m - 0.8)));
+  col += mix(CORAL_DARK, BLACK, smoothstep(0.0, 1.0, abs(m)));
+  col += mix(CORAL, BLACK, smoothstep(0.0, 1.0, abs(m - 0.8)));
   return col * 0.5;
 }
 
@@ -191,7 +191,10 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     }
   }
 
-  fragColor = vec4(col, 1.0);
+  float edge = max(abs(baseUv.x), abs(baseUv.y));
+  float fade = smoothstep(0.9, 1.1, edge);
+  float alpha = 1.0 - fade;
+  fragColor = vec4(col, alpha);
 }
 
 void main() {
@@ -274,7 +277,6 @@ export default function FloatingLines({
   const targetInfluenceRef = useRef<number>(0);
   const currentInfluenceRef = useRef<number>(0);
   const targetParallaxRef = useRef<Vector2>(new Vector2(0, 0));
-  const resolvedGradient = linesGradient?.length ? linesGradient : ['#ff6b4a', '#000000'];
   const currentParallaxRef = useRef<Vector2>(new Vector2(0, 0));
 
   const getLineCount = (waveType: 'top' | 'middle' | 'bottom'): number => {
@@ -307,8 +309,9 @@ export default function FloatingLines({
     const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
     camera.position.z = 1;
 
-    const renderer = new WebGLRenderer({ antialias: true, alpha: false });
+    const renderer = new WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setClearColor(0x000000, 0);
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = '100%';
     containerRef.current.appendChild(renderer.domElement);
@@ -364,8 +367,8 @@ export default function FloatingLines({
       lineGradientCount: { value: 0 }
     };
 
-    if (resolvedGradient && resolvedGradient.length > 0) {
-      const stops = resolvedGradient.slice(0, MAX_GRADIENT_STOPS);
+    if (linesGradient && linesGradient.length > 0) {
+      const stops = linesGradient.slice(0, MAX_GRADIENT_STOPS);
       uniforms.lineGradientCount.value = stops.length;
 
       stops.forEach((hex, i) => {

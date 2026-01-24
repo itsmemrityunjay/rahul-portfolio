@@ -8,6 +8,7 @@ import Noise from '@/components/Noise'
 
 export default function Hero() {
   const [text, setText] = useState('RAHUL DHIMAN');
+  const [isInAboutSection, setIsInAboutSection] = useState(false);
   const finalText = 'RAHUL DHIMAN   ';
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_+-=[]{}|;:,.<>?';
 
@@ -37,8 +38,27 @@ export default function Hero() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const aboutSection = document.querySelector('section[class*="About"]') || 
+                          document.querySelector('[id="about"]') ||
+                          document.querySelector('section:has(h2:contains("About"))');
+      
+      if (aboutSection) {
+        const rect = aboutSection.getBoundingClientRect();
+        // Check if about section is in viewport (top of section is above middle of screen)
+        setIsInAboutSection(rect.top < window.innerHeight / 2 && rect.bottom > 0);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <div className="relative min-h-screen bg-black text-white overflow-hidden">
+    <>
+      <div className="relative min-h-screen bg-black text-white overflow-hidden">
       {/* Background Image with Noise */}
       <div className="absolute inset-0 z-0 opacity-70">
         <Image
@@ -59,11 +79,20 @@ export default function Hero() {
       </div>
 
       {/* Bottom gradient fade */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-60 bg-gradient-to-t from-black/80 via-grey/70 to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 via-grey/70 to-transparent z-10" />
       
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 px-4 sm:px-8 lg:px-16 py-4 sm:py-6 flex justify-between items-center">
-        <div className="text-lg sm:text-xl font-bold">RAHUL</div>
+      <nav className={`fixed top-0 w-full z-50 px-4 sm:px-8 lg:px-16 py-4 sm:py-6 flex justify-between items-center transition-all duration-300 ${isInAboutSection ? 'bg-black' : 'bg-transparent'}`}>
+        <div className="flex items-center nav-logo-float">
+          <Image
+            src="/rahul1.png"
+            alt="Rahul logo"
+            width={48}
+            height={48}
+            className="h-12 w-12 rounded-full object-contain"
+            priority
+          />
+        </div>
         <div className="hidden md:flex items-center gap-4 lg:gap-8">
           <a href="#projects" className="text-gray-300 hover:text-white transition-colors text-sm lg:text-base">
             Projects
@@ -131,7 +160,19 @@ export default function Hero() {
       {/* Bottom elements */}
  
       
+      </div>
 
-    </div>
+      <style jsx>{`
+        .nav-logo-float {
+          animation: navFloat 2s ease-in-out infinite;
+        }
+
+        @keyframes navFloat {
+          0% { transform: translateY(0); }
+          50% { transform: translateY(-6px); }
+          100% { transform: translateY(0); }
+        }
+      `}</style>
+    </>
   );
 }

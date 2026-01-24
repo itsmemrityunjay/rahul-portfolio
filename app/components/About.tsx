@@ -34,6 +34,7 @@ export default function About() {
 
   return (
     <section 
+      id="about"
       ref={sectionRef}
       className="relative pt-30 bg-black text-white flex items-center justify-center px-8 lg:px-16 "
     >

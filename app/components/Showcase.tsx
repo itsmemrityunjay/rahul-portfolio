@@ -29,6 +29,10 @@ export default function Showcase() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [viewportWidth, setViewportWidth] = useState(0);
+  const rafRef = useRef<number | null>(null);
+  const targetProgressRef = useRef(0);
+  const currentProgressRef = useRef(0);
+  const velocityRef = useRef(0);
 
   // Animated gradient canvas
   useEffect(() => {
@@ -114,51 +118,74 @@ export default function Showcase() {
       const totalScrollable = sectionHeight;
       const progress = Math.max(0, Math.min(1, scrolled / totalScrollable));
       
-      setScrollProgress(progress);
+      targetProgressRef.current = progress;
+    };
+
+    const smoothScroll = () => {
+      const diff = targetProgressRef.current - currentProgressRef.current;
+      
+      // Ultra smooth dampening with velocity smoothing for buttery feel
+      const dampening = 0.08;
+      velocityRef.current += (diff - velocityRef.current) * 0.3;
+      currentProgressRef.current += velocityRef.current * dampening;
+      
+      // Clamp to target range
+      currentProgressRef.current = Math.max(0, Math.min(1, currentProgressRef.current));
+      
+      setScrollProgress(currentProgressRef.current);
+      rafRef.current = requestAnimationFrame(smoothScroll);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
+    rafRef.current = requestAnimationFrame(smoothScroll);
 
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
   }, []);
 
   const totalCards = projects.length;
   const progressPerCard = 1 / (totalCards + 1);
 
   // Smooth continuous title and gradient animations - slower
-  const showcaseProgress = Math.min(1, scrollProgress / 0.45);
+  const showcaseProgress = Math.min(1, scrollProgress / 0.5);
   
-  // Smooth easing function for natural motion
+  // Ultra smooth easing function for natural motion
   const easeInOutCubic = (t: number) => {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  };
+  
+  const easeInOutQuart = (t: number) => {
+    return t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
   };
   
   let titleScale, titleOpacity, gradientScale, gradientOpacity;
   
   if (showcaseProgress < 0.5) {
-    // Smooth grow phase with easing
+    // Ultra smooth grow phase with easing
     const t = showcaseProgress / 0.5;
-    const easedProgress = easeInOutCubic(t);
+    const easedProgress = easeInOutQuart(t);
     titleScale = 0.3 + (easedProgress * 0.7);
-    titleOpacity = Math.min(1, easedProgress * 1.2);
+    titleOpacity = Math.min(1, easedProgress * 1.3);
     gradientScale = 0.3 + (easedProgress * 0.7);
-    gradientOpacity = Math.min(0.9, easedProgress * 1.2);
-  } else if (showcaseProgress < 0.6) {
+    gradientOpacity = Math.min(0.9, easedProgress * 1.3);
+  } else if (showcaseProgress < 0.65) {
     // Stay at center - smooth hold
-    const holdProgress = (showcaseProgress - 0.5) / 0.1;
-    titleScale = 1 - (holdProgress * 0.02); // Subtle breathing
+    const holdProgress = (showcaseProgress - 0.5) / 0.15;
+    titleScale = 1 - (holdProgress * 0.01); // Subtle breathing
     titleOpacity = 1;
     gradientScale = 1;
     gradientOpacity = 0.9;
   } else {
-    // Smooth shrink phase with easing
-    const t = (showcaseProgress - 0.6) / 0.4;
-    const easedProgress = easeInOutCubic(t);
-    titleScale = Math.max(0.2, 0.98 - easedProgress * 0.78);
-    titleOpacity = Math.max(0, 1 - easedProgress * 1.2);
-    gradientScale = Math.max(0, 1 - easedProgress);
-    gradientOpacity = Math.max(0, 0.9 - easedProgress * 0.9);
+    // Ultra smooth shrink phase with easing
+    const t = (showcaseProgress - 0.65) / 0.35;
+    const easedProgress = easeInOutQuart(t);
+    titleScale = Math.max(0.2, 0.99 - easedProgress * 0.79);
+    titleOpacity = Math.max(0, 1 - easedProgress * 1.3);
+    gradientScale = Math.max(0, 1 - easedProgress * 1.1);
+    gradientOpacity = Math.max(0, 0.9 - easedProgress);
   }
 
   return (
@@ -177,7 +204,7 @@ export default function Showcase() {
           style={{
             opacity: gradientOpacity,
             transform: `scale(${gradientScale}) translateZ(0)`,
-            transition: 'transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1)',
+            transition: 'transform 2s cubic-bezier(0.19, 1, 0.22, 1), opacity 2s cubic-bezier(0.19, 1, 0.22, 1)',
             willChange: 'transform, opacity',
           }}
         />
@@ -193,7 +220,7 @@ export default function Showcase() {
           style={{
             opacity: titleOpacity,
             transform: `scale(${titleScale}) translateZ(0)`,
-            transition: 'transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1)',
+            transition: 'transform 2s cubic-bezier(0.19, 1, 0.22, 1), opacity 2s cubic-bezier(0.19, 1, 0.22, 1)',
             willChange: 'transform, opacity',
           }}
         >
@@ -215,64 +242,53 @@ export default function Showcase() {
           
           const cardLocalProgress = (scrollProgress - cardStartProgress) / (cardEndProgress - cardStartProgress);
           
-          // Smooth easing function
-          const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4);
-          const easeInQuart = (t: number) => t * t * t * t;
+          // Ultra smooth easing functions
+          const easeOutQuint = (t: number) => 1 - Math.pow(1 - t, 5);
+          const easeInQuint = (t: number) => t * t * t * t * t;
           
-          // Calculate card position and opacity with smooth easing
+          // Calculate card position and opacity with ultra smooth easing
           let cardY = 100;
           let cardOpacity = 0;
-          let cardScale = 0.9;
+          let contentScale = 1.15; // Start larger
           
           if (cardLocalProgress < 0) {
             cardY = 100;
             cardOpacity = 0;
-            cardScale = 0.9;
-          } else if (cardLocalProgress <= 0.65) {
-            // Smooth entry with easeOutQuart - slower
-            const t = cardLocalProgress / 0.65;
-            const easedProgress = easeOutQuart(t);
-            cardY = 100 * (1 - easedProgress);
-            cardOpacity = Math.min(1, easedProgress * 1.3);
-            cardScale = 0.9 + (easedProgress * 0.1);
+            contentScale = 1.15;
+          } else if (cardLocalProgress <= 0.7) {
+            // Entry motion: keep card fully solid while approaching center
+            const t = cardLocalProgress / 0.7;
+            const easedProgress = easeOutQuint(t);
+            // Animate from bottom (100) to centered position
+            // Center offset will depend on final card height from aspect ratio
+            cardY = 100 - 85 * easedProgress;
+            cardOpacity = 1;
+            // Scale down content from 1.15 to 1.0 to maintain aspect ratio
+            contentScale = 1.15 - (0.15 * easedProgress);
           } else {
-            // Card at center
-            cardY = 0;
-            cardScale = 1;
+            // Card at center - centered vertically
+            cardY = 15;
+            contentScale = 1.0; // Final scale at center
             
-            // Smooth fade out when next card approaches
-            const nextCardStartProgress = progressPerCard * (index + 2);
-            const nextCardLocalProgress = (scrollProgress - nextCardStartProgress) / (cardEndProgress - cardStartProgress);
+            // Slow, gradual fade starting much earlier
+            // Fade begins at 70% through current card's section for slower transition
+            const fadeStartPoint = 0.7;
             
-            if (nextCardLocalProgress > 0 && nextCardLocalProgress <= 0.7) {
-              const t = nextCardLocalProgress / 0.7;
-              const easedFade = easeInQuart(t);
-              cardOpacity = 1 - easedFade;
-            } else if (nextCardLocalProgress > 0.7) {
-              cardOpacity = 0;
+            if (cardLocalProgress >= fadeStartPoint) {
+              // Fade within current card's own timeline
+              const t = (cardLocalProgress - fadeStartPoint) / (1 - fadeStartPoint);
+              // Softer cubic easing for smooth, gentle fade
+              const easedFade = t * t * t;
+              // Fade from 100% to 85% opacity only (never fully transparent)
+              cardOpacity = 1 - (easedFade * 0.15);
             } else {
               cardOpacity = 1;
             }
           }
           
           // Width animation starts early and completes as card reaches center
-          const shrinkStart = 0; // Start shrinking immediately when card appears
-          const shrinkEnd = 0.5; // Complete shrinking when card reaches center
-          
-          // Force scale to 1 during width shrink window so width change stays visible
-          if (cardLocalProgress >= shrinkStart && cardLocalProgress <= shrinkEnd) {
-            cardScale = 1;
-          }
-
-          // Smooth internal content reveals with easing - slower
-          const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
-          const textRevealProgress = Math.max(0, Math.min(1, (cardLocalProgress - 0.35) / 0.45));
-          const imageRevealProgress = Math.max(0, Math.min(1, (cardLocalProgress - 0.4) / 0.45));
-          
-          const textY = 20 * (1 - easeOutCubic(textRevealProgress));
-          const textOpacity = easeOutCubic(textRevealProgress);
-          const imageY = 30 * (1 - easeOutCubic(imageRevealProgress));
-          const imageOpacity = easeOutCubic(imageRevealProgress);
+          const shrinkStart = -0.15; // Start shrinking even earlier before card appears
+          const shrinkEnd = 0.4; // Complete shrinking earlier
           
           // Only render if card has some visibility
           if (cardLocalProgress < -0.1 || cardOpacity <= 0) return null;
@@ -282,13 +298,13 @@ export default function Showcase() {
           let cardWidthPercent = 100;
           let cardMaxWidth = 'none';
 
-          if (cardLocalProgress < 0) {
+          if (cardLocalProgress < shrinkStart) {
             // Before entry: full width
             cardWidthPercent = 100;
             cardMaxWidth = `${viewportWidth || 9999}px`;
           } else if (cardLocalProgress <= shrinkEnd) {
             // Shrink phase: animate width from 100% → 85% as card moves up
-            const t = cardLocalProgress / shrinkEnd;
+            const t = (cardLocalProgress - shrinkStart) / (shrinkEnd - shrinkStart);
             const eased = easeInOutCubic(t);
             cardWidthPercent = 100 - (100 - finalWidthPercent) * eased;
 
@@ -308,46 +324,48 @@ export default function Showcase() {
                 className="absolute inset-0 overflow-hidden"
               style={{
                 opacity: cardOpacity,
-                transform: `translate3d(0, ${cardY}%, 0) scale(${cardScale})`,
-                transition: 'transform 1.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                transform: `translate3d(0, ${cardY}%, 0)`,
+                transition: 'none',
                 zIndex: 20 + index,
                 willChange: 'transform, opacity',
               }}
             >
               <div
-                  className="relative h-[80vh] mx-auto"
+                  className="relative mx-auto"
                 style={{
                     width: `${cardWidthPercent}%`,
                     maxWidth: cardMaxWidth,
-                    transition: 'width 1.6s cubic-bezier(0.16, 1, 0.3, 1), max-width 1.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                    aspectRatio: '16 / 7',
+                    height: 'auto',
+                    transition: 'none',
                     willChange: 'width, max-width',
                 }}
               >
-                <div className="pointer-events-none absolute inset-[-28px] rounded-[32px] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.16),rgba(255,255,255,0.06),transparent_60%)] blur-2xl opacity-90" />
-                <div className="bg-black border border-white/40 rounded-xl overflow-hidden h-full shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+                <div className="pointer-events-none absolute inset-[-28px] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.16),rgba(255,255,255,0.06),transparent_60%)] blur-2xl opacity-90" />
+                <div className="bg-black  overflow-hidden h-full shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 h-full">
                     {/* Left - Text */}
                     <div 
-                      className="p-8 lg:p-12 flex flex-col justify-center"
+                      className="p-8 lg:p-12 flex flex-col justify-center bg-gradient-to-br to-[#FF8C5A] via-[#FF6B4A] from-[#FF5533]"
                       style={{
-                        opacity: textOpacity,
-                        transform: `translateY(${textY}px) translateZ(0)`,
-                        transition: 'transform 1.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                        willChange: 'transform, opacity',
+                        transform: `scale(${contentScale}) translateZ(0)`,
+                        transformOrigin: 'center',
+                        transition: 'none',
+                        willChange: 'transform',
                       }}
                     >
-                      <h3 className="text-2xl lg:text-3xl font-semibold text-white mb-2">
+                      <h3 className="text-xl lg:text-2xl font-semibold text-white mb-2">
                         {project.title}
                       </h3>
-                      <p className="text-gray-500 text-sm uppercase tracking-wider mb-6">
+                      <p className="text-white/90 text-xs uppercase tracking-wider mb-6">
                         {project.category}
                       </p>
-                      <p className="text-gray-400 text-base lg:text-lg leading-relaxed mb-8">
+                      <p className="text-white/95 max-w-[500px] text-sm lg:text-base leading-relaxed mb-8">
                         {project.description}
                       </p>
                       <a 
                         href="#" 
-                        className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors w-fit group"
+                        className="flex items-center gap-2 text-white hover:text-white/80 transition-colors w-fit group"
                       >
                         <span className="text-sm font-medium">Full Project</span>
                         <svg 
@@ -368,9 +386,10 @@ export default function Showcase() {
                     <div 
                       className="relative h-full bg-[#111] overflow-hidden"
                       style={{
-                        opacity: imageOpacity,
-                        transform: `translateY(${imageY}px)`,
-                        transition: 'transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1)',
+                        transform: `scale(${contentScale}) translateZ(0)`,
+                        transformOrigin: 'center',
+                        transition: 'none',
+                        willChange: 'transform',
                       }}
                     >
                       {project.id === 1 ? (
@@ -379,7 +398,7 @@ export default function Showcase() {
                             src="/project1.png"
                             alt="Adobe Firefly Contributor Portal preview"
                             fill
-                            className="object-cover border"
+                            className="object-cover "
                             sizes="(min-width: 1024px) 50vw, 100vw"
                             priority
                           />

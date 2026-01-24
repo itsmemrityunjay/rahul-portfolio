@@ -33,6 +33,9 @@ const workItems = [
 export default function Work() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const rafRef = useRef<number>();
+  const targetProgressRef = useRef(0);
+  const currentProgressRef = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,14 +49,31 @@ export default function Work() {
       const totalScrollable = sectionHeight;
       const progress = Math.max(0, Math.min(1, scrolled / totalScrollable));
       
-      setScrollProgress(progress);
+      targetProgressRef.current = progress;
+    };
+
+    const smoothScroll = () => {
+      const diff = targetProgressRef.current - currentProgressRef.current;
+      currentProgressRef.current += diff * 0.1; // Smooth dampening
+      
+      setScrollProgress(currentProgressRef.current);
+      rafRef.current = requestAnimationFrame(smoothScroll);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
+    rafRef.current = requestAnimationFrame(smoothScroll);
 
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
   }, []);
+
+  // Smooth easing function for natural motion
+  const easeInOutCubic = (t: number): number => {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  };
 
   // Animation phases:
   // Phase 1 (0-0.3): Cards come from bottom to center in grid formation
@@ -75,7 +95,7 @@ export default function Work() {
     
     // Phase 1: Coming from bottom (0-0.3) - maintaining grid formation
     if (scrollProgress < 0.3) {
-      const phase1Progress = scrollProgress / 0.3;
+      const phase1Progress = easeInOutCubic(scrollProgress / 0.3);
       const startY = 120; // Start below viewport
       const endY = initialGridY; // End at grid position
       const currentY = startY + ((endY - startY) * phase1Progress);
@@ -90,7 +110,7 @@ export default function Work() {
     
     // Phase 2: Split horizontally (0.3-0.6) - NO vertical movement
     if (scrollProgress < 0.6) {
-      const phase2Progress = (scrollProgress - 0.3) / 0.3;
+      const phase2Progress = easeInOutCubic((scrollProgress - 0.3) / 0.3);
       
       // Move horizontally only: left cards go more left, right cards go more right
       const targetX = isLeft ? -35 : 35; // Move further to sides (half off-screen)
@@ -121,14 +141,14 @@ export default function Work() {
   // Center text animation (appears earlier in phase 2)
   const getCenterTextOpacity = () => {
     if (scrollProgress < 0.4) return 0;
-    const textProgress = (scrollProgress - 0.4) / 0.3;
-    return Math.min(1, textProgress);
+    const textProgress = easeInOutCubic(Math.min(1, (scrollProgress - 0.4) / 0.3));
+    return textProgress;
   };
 
   const getCenterTextScale = () => {
     if (scrollProgress < 0.4) return 0.8;
-    const textProgress = (scrollProgress - 0.4) / 0.3;
-    return 0.8 + (Math.min(1, textProgress) * 0.2);
+    const textProgress = easeInOutCubic(Math.min(1, (scrollProgress - 0.4) / 0.3));
+    return 0.8 + (textProgress * 0.2);
   };
 
   return (
@@ -153,7 +173,7 @@ export default function Work() {
                 style={{
                   transform: `translate(${transform.x}vw, ${transform.y}vh) scale(${transform.scale})`,
                   opacity: transform.opacity,
-                  transition: 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease-out',
+                  transition: 'none', // Remove CSS transitions, let RAF handle smoothness
                   willChange: 'transform, opacity',
                 }}
               >
@@ -180,7 +200,7 @@ export default function Work() {
           style={{
             opacity: getCenterTextOpacity(),
             transform: `scale(${getCenterTextScale()})`,
-            transition: 'opacity 0.4s ease-out, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+            transition: 'none', // RAF handles smoothness
           }}
         >
           <h2 className="text-7xl md:text-8xl lg:text-9xl font-serif mb-6 text-white text-center leading-tight">

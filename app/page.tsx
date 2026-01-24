@@ -8,6 +8,7 @@ import Showcase from "./components/Showcase";
 import Work from "./components/Work";
 import Lenis from 'lenis'
 import Connect from "./components/Connect";
+import Footer from "./components/Footer";
 
 export default function Home() {
   useEffect(() => {
@@ -36,6 +37,7 @@ export default function Home() {
       <Showcase />
       <Work />
       <Connect />
+      <Footer />
     </div>
   );
 }
