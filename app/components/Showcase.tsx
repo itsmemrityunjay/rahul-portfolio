@@ -28,6 +28,7 @@ export default function Showcase() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [viewportWidth, setViewportWidth] = useState(0);
 
   // Animated gradient canvas
   useEffect(() => {
@@ -93,6 +94,14 @@ export default function Showcase() {
     };
   }, []);
 
+  // Track viewport width for width animation calculations
+  useEffect(() => {
+    const updateViewportWidth = () => setViewportWidth(window.innerWidth);
+    updateViewportWidth();
+    window.addEventListener('resize', updateViewportWidth);
+    return () => window.removeEventListener('resize', updateViewportWidth);
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => {
       if (!sectionRef.current) return;
@@ -115,36 +124,41 @@ export default function Showcase() {
   }, []);
 
   const totalCards = projects.length;
-  const progressPerCard = 1 / (totalCards + 1); // Cards appear much sooner
+  const progressPerCard = 1 / (totalCards + 1);
 
-  // Showcase title and gradient: grow from bottom to center, then shrink
-  // Use separate timing for showcase text (not tied to progressPerCard)
-  const showcaseProgress = Math.min(1, scrollProgress / 0.3); // Independent showcase timing - more scroll to reach center
+  // Smooth continuous title and gradient animations - slower
+  const showcaseProgress = Math.min(1, scrollProgress / 0.45);
   
-  // Entry phase: scale up from 0.3 to 1 as it enters from bottom and reaches center
-  // Stay at center, then shrink as cards appear
+  // Smooth easing function for natural motion
+  const easeInOutCubic = (t: number) => {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  };
+  
   let titleScale, titleOpacity, gradientScale, gradientOpacity;
   
-  if (showcaseProgress < 0.55) {
-    // Growing phase: 0 to 0.55 progress - text grows until reaching center
-    const growProgress = showcaseProgress / 0.55;
-    titleScale = 0.3 + (growProgress * 0.7); // Scale from 0.3 to 1
-    titleOpacity = Math.min(1, growProgress * 1.3); // Fade in smoothly
-    gradientScale = 0.3 + (growProgress * 0.7); // Scale from 0.3 to 1
-    gradientOpacity = Math.min(0.9, growProgress * 1.3); // Fade in smoothly
-  } else if (showcaseProgress < 0.65) {
-    // At center phase: 0.55 to 0.65 - stay at full size at center
-    titleScale = 1;
+  if (showcaseProgress < 0.5) {
+    // Smooth grow phase with easing
+    const t = showcaseProgress / 0.5;
+    const easedProgress = easeInOutCubic(t);
+    titleScale = 0.3 + (easedProgress * 0.7);
+    titleOpacity = Math.min(1, easedProgress * 1.2);
+    gradientScale = 0.3 + (easedProgress * 0.7);
+    gradientOpacity = Math.min(0.9, easedProgress * 1.2);
+  } else if (showcaseProgress < 0.6) {
+    // Stay at center - smooth hold
+    const holdProgress = (showcaseProgress - 0.5) / 0.1;
+    titleScale = 1 - (holdProgress * 0.02); // Subtle breathing
     titleOpacity = 1;
     gradientScale = 1;
     gradientOpacity = 0.9;
   } else {
-    // Shrinking phase: 0.65 to 1 progress - shrink after staying at center
-    const shrinkProgress = (showcaseProgress - 0.65) / 0.35;
-    titleScale = Math.max(0.2, 1 - shrinkProgress * 0.8);
-    titleOpacity = Math.max(0, 1 - shrinkProgress * 1.3);
-    gradientScale = Math.max(0, 1 - shrinkProgress * 1);
-    gradientOpacity = Math.max(0, 0.9 - shrinkProgress * 0.9);
+    // Smooth shrink phase with easing
+    const t = (showcaseProgress - 0.6) / 0.4;
+    const easedProgress = easeInOutCubic(t);
+    titleScale = Math.max(0.2, 0.98 - easedProgress * 0.78);
+    titleOpacity = Math.max(0, 1 - easedProgress * 1.2);
+    gradientScale = Math.max(0, 1 - easedProgress);
+    gradientOpacity = Math.max(0, 0.9 - easedProgress * 0.9);
   }
 
   return (
@@ -163,7 +177,7 @@ export default function Showcase() {
           style={{
             opacity: gradientOpacity,
             transform: `scale(${gradientScale}) translateZ(0)`,
-            transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
+            transition: 'transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1)',
             willChange: 'transform, opacity',
           }}
         />
@@ -179,7 +193,7 @@ export default function Showcase() {
           style={{
             opacity: titleOpacity,
             transform: `scale(${titleScale}) translateZ(0)`,
-            transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
+            transition: 'transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1)',
             willChange: 'transform, opacity',
           }}
         >
@@ -201,67 +215,112 @@ export default function Showcase() {
           
           const cardLocalProgress = (scrollProgress - cardStartProgress) / (cardEndProgress - cardStartProgress);
           
-          // Calculate card position and opacity
-          let cardY = 100; // Start from bottom (100vh)
+          // Smooth easing function
+          const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4);
+          const easeInQuart = (t: number) => t * t * t * t;
+          
+          // Calculate card position and opacity with smooth easing
+          let cardY = 100;
           let cardOpacity = 0;
-          let cardScale = 0.95;
+          let cardScale = 0.9;
           
           if (cardLocalProgress < 0) {
-            // Card hasn't entered yet - keep it below
             cardY = 100;
             cardOpacity = 0;
-            cardScale = 0.95;
-          } else if (cardLocalProgress <= 0.4) {
-            // Card is entering from bottom (0 to 0.4 progress)
-            const entryProgress = cardLocalProgress / 0.4;
-            cardY = 100 * (1 - entryProgress);
-            cardOpacity = entryProgress;
-            cardScale = 0.95 + (entryProgress * 0.05); // Scale from 0.95 to 1
+            cardScale = 0.9;
+          } else if (cardLocalProgress <= 0.65) {
+            // Smooth entry with easeOutQuart - slower
+            const t = cardLocalProgress / 0.65;
+            const easedProgress = easeOutQuart(t);
+            cardY = 100 * (1 - easedProgress);
+            cardOpacity = Math.min(1, easedProgress * 1.3);
+            cardScale = 0.9 + (easedProgress * 0.1);
           } else {
-            // Card reached center and stays there - no more movement
+            // Card at center
             cardY = 0;
             cardScale = 1;
             
-            // Check if next card is coming - if so, fade out current card while it stays in place
+            // Smooth fade out when next card approaches
             const nextCardStartProgress = progressPerCard * (index + 2);
             const nextCardLocalProgress = (scrollProgress - nextCardStartProgress) / (cardEndProgress - cardStartProgress);
             
-            if (nextCardLocalProgress > 0 && nextCardLocalProgress <= 0.4) {
-              // Next card is entering (first 40% of its journey), fade out current card
-              const fadeProgress = nextCardLocalProgress / 0.4;
-              cardOpacity = 1 - fadeProgress;
-            } else if (nextCardLocalProgress > 0.4) {
-              // Next card has fully appeared, this card is gone
+            if (nextCardLocalProgress > 0 && nextCardLocalProgress <= 0.7) {
+              const t = nextCardLocalProgress / 0.7;
+              const easedFade = easeInQuart(t);
+              cardOpacity = 1 - easedFade;
+            } else if (nextCardLocalProgress > 0.7) {
               cardOpacity = 0;
             } else {
-              // No next card yet, stay fully visible
               cardOpacity = 1;
             }
           }
           
-          // Internal reveal for text and image
-          const revealProgress = Math.max(0, Math.min(1, (cardLocalProgress - 0.2) / 0.2));
-          const textY = 16 * (1 - revealProgress);
-          const textOpacity = revealProgress;
-          const imageY = 24 * (1 - Math.max(0, Math.min(1, (cardLocalProgress - 0.25) / 0.2)));
-          const imageOpacity = Math.max(0, Math.min(1, (cardLocalProgress - 0.25) / 0.2));
+          // Force scale to 1 during width shrink window so width change stays visible
+          const shrinkStart = 0.3;
+          const shrinkEnd = 0.7;
+          if (cardLocalProgress >= shrinkStart && cardLocalProgress <= shrinkEnd) {
+            cardScale = 1;
+          }
+
+          // Smooth internal content reveals with easing - slower
+          const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+          const textRevealProgress = Math.max(0, Math.min(1, (cardLocalProgress - 0.35) / 0.45));
+          const imageRevealProgress = Math.max(0, Math.min(1, (cardLocalProgress - 0.4) / 0.45));
+          
+          const textY = 20 * (1 - easeOutCubic(textRevealProgress));
+          const textOpacity = easeOutCubic(textRevealProgress);
+          const imageY = 30 * (1 - easeOutCubic(imageRevealProgress));
+          const imageOpacity = easeOutCubic(imageRevealProgress);
           
           // Only render if card has some visibility
           if (cardLocalProgress < -0.1 || cardOpacity <= 0) return null;
+
+            // PHASE-BASED WIDTH ANIMATION (with earlier, slower shrink)
+            const finalWidthPercent = 85; // Target final width: 85%
+            let cardWidthPercent = 100;
+            let cardMaxWidth = 'none';
+
+            if (cardLocalProgress <= shrinkStart) {
+              // PHASE 1 — Entry: maintain full width, NO max-width constraint
+              cardWidthPercent = 100;
+              cardMaxWidth = `${viewportWidth || 9999}px`;
+            } else if (cardLocalProgress <= shrinkEnd) {
+              // PHASE 2 — Shrink: animate width from 100% → 85% with gentler easing
+              const t = (cardLocalProgress - shrinkStart) / (shrinkEnd - shrinkStart);
+              const eased = easeInOutCubic(t);
+              cardWidthPercent = 100 - (100 - finalWidthPercent) * eased;
+
+              const maxStart = viewportWidth ? viewportWidth * 1.1 : 2000; // start high to avoid clamp
+              const maxEnd = 1280;
+              const maxLerp = maxStart + (maxEnd - maxStart) * eased;
+              cardMaxWidth = `${maxLerp}px`;
+            } else {
+              // PHASE 3 & 4 — Hold and exit: maintain final width and max width
+              cardWidthPercent = finalWidthPercent;
+              cardMaxWidth = '1280px';
+            }
           
           return (
             <div 
               key={project.id}
-              className="absolute inset-0 flex items-center justify-center px-6 lg:px-12"
+                className="absolute inset-0 overflow-hidden"
               style={{
                 opacity: cardOpacity,
                 transform: `translate3d(0, ${cardY}%, 0) scale(${cardScale})`,
-                transition: 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
+                transition: 'transform 1.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.6s cubic-bezier(0.16, 1, 0.3, 1)',
                 zIndex: 20 + index,
                 willChange: 'transform, opacity',
               }}
             >
-              <div className="relative w-full max-w-7xl h-[80vh]">
+              <div
+                  className="relative h-[80vh] mx-auto"
+                style={{
+                    width: `${cardWidthPercent}%`,
+                    maxWidth: cardMaxWidth,
+                    transition: 'width 1.6s cubic-bezier(0.16, 1, 0.3, 1), max-width 1.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                    willChange: 'width, max-width',
+                }}
+              >
                 <div className="pointer-events-none absolute inset-[-28px] rounded-[32px] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.16),rgba(255,255,255,0.06),transparent_60%)] blur-2xl opacity-90" />
                 <div className="bg-black border border-white/40 rounded-xl overflow-hidden h-full shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 h-full">
@@ -271,7 +330,7 @@ export default function Showcase() {
                       style={{
                         opacity: textOpacity,
                         transform: `translateY(${textY}px) translateZ(0)`,
-                        transition: 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+                        transition: 'transform 1.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1)',
                         willChange: 'transform, opacity',
                       }}
                     >
@@ -309,7 +368,7 @@ export default function Showcase() {
                       style={{
                         opacity: imageOpacity,
                         transform: `translateY(${imageY}px)`,
-                        transition: 'transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1)',
+                        transition: 'transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1)',
                       }}
                     >
                       {project.id === 1 ? (
