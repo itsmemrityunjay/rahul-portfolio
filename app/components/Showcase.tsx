@@ -255,9 +255,11 @@ export default function Showcase() {
             }
           }
           
+          // Width animation starts early and completes as card reaches center
+          const shrinkStart = 0; // Start shrinking immediately when card appears
+          const shrinkEnd = 0.5; // Complete shrinking when card reaches center
+          
           // Force scale to 1 during width shrink window so width change stays visible
-          const shrinkStart = 0.3;
-          const shrinkEnd = 0.7;
           if (cardLocalProgress >= shrinkStart && cardLocalProgress <= shrinkEnd) {
             cardScale = 1;
           }
@@ -275,30 +277,30 @@ export default function Showcase() {
           // Only render if card has some visibility
           if (cardLocalProgress < -0.1 || cardOpacity <= 0) return null;
 
-            // PHASE-BASED WIDTH ANIMATION (with earlier, slower shrink)
-            const finalWidthPercent = 85; // Target final width: 85%
-            let cardWidthPercent = 100;
-            let cardMaxWidth = 'none';
+          // PHASE-BASED WIDTH ANIMATION (shrinks as card enters)
+          const finalWidthPercent = 85; // Target final width: 85%
+          let cardWidthPercent = 100;
+          let cardMaxWidth = 'none';
 
-            if (cardLocalProgress <= shrinkStart) {
-              // PHASE 1 — Entry: maintain full width, NO max-width constraint
-              cardWidthPercent = 100;
-              cardMaxWidth = `${viewportWidth || 9999}px`;
-            } else if (cardLocalProgress <= shrinkEnd) {
-              // PHASE 2 — Shrink: animate width from 100% → 85% with gentler easing
-              const t = (cardLocalProgress - shrinkStart) / (shrinkEnd - shrinkStart);
-              const eased = easeInOutCubic(t);
-              cardWidthPercent = 100 - (100 - finalWidthPercent) * eased;
+          if (cardLocalProgress < 0) {
+            // Before entry: full width
+            cardWidthPercent = 100;
+            cardMaxWidth = `${viewportWidth || 9999}px`;
+          } else if (cardLocalProgress <= shrinkEnd) {
+            // Shrink phase: animate width from 100% → 85% as card moves up
+            const t = cardLocalProgress / shrinkEnd;
+            const eased = easeInOutCubic(t);
+            cardWidthPercent = 100 - (100 - finalWidthPercent) * eased;
 
-              const maxStart = viewportWidth ? viewportWidth * 1.1 : 2000; // start high to avoid clamp
-              const maxEnd = 1280;
-              const maxLerp = maxStart + (maxEnd - maxStart) * eased;
-              cardMaxWidth = `${maxLerp}px`;
-            } else {
-              // PHASE 3 & 4 — Hold and exit: maintain final width and max width
-              cardWidthPercent = finalWidthPercent;
-              cardMaxWidth = '1280px';
-            }
+            const maxStart = viewportWidth ? viewportWidth * 1.1 : 2000;
+            const maxEnd = 1280;
+            const maxLerp = maxStart + (maxEnd - maxStart) * eased;
+            cardMaxWidth = `${maxLerp}px`;
+          } else {
+            // Hold and exit: maintain final width
+            cardWidthPercent = finalWidthPercent;
+            cardMaxWidth = '1280px';
+          }
           
           return (
             <div 
