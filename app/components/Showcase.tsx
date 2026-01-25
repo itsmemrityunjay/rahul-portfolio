@@ -8,18 +8,21 @@ const projects = [
     id: 1,
     title: 'Adobe Firefly Contributor Portal',
     category: 'Product Design',
+    image: '/project1.png',
     description: 'The project explores the development process of generative AI and aims to improve the process by making data and feedback collection easier for the developers while engaging users in doing so.',
   },
   {
     id: 2,
     title: 'Digital Spirometry App',
     category: 'Healthcare UX',
+    image: '/xyz.png',
     description: 'A comprehensive mobile application for respiratory health monitoring, featuring real-time spirometry tests, result tracking, and personalized health insights for patients.',
   },
   {
     id: 3,
     title: 'Projector HMI',
     category: 'Interaction Design',
+    image: '/project1.png',
     description: 'A Human Machine Interaction project aimed at enhancing the projecting experience by creating an intuitive and easy-to-use interface.',
   },
 ];
@@ -279,8 +282,8 @@ export default function Showcase() {
               const t = (cardLocalProgress - fadeStartPoint) / (1 - fadeStartPoint);
               // Softer cubic easing for smooth, gentle fade
               const easedFade = t * t * t;
-              // Fade from 100% to 85% opacity only (never fully transparent)
-              cardOpacity = 1 - (easedFade * 0.15);
+              // Fade from 100% to 75% opacity only (never below 75%)
+              cardOpacity = 1 - (easedFade * 0.25);
             } else {
               cardOpacity = 1;
             }
@@ -392,15 +395,15 @@ export default function Showcase() {
                         willChange: 'transform',
                       }}
                     >
-                      {project.id === 1 ? (
+                      {project.image ? (
                         <>
                           <Image
-                            src="/project1.png"
-                            alt="Adobe Firefly Contributor Portal preview"
+                            src={project.image}
+                            alt={`${project.title} preview`}
                             fill
-                            className="object-cover "
+                            className="object-cover"
                             sizes="(min-width: 1024px) 50vw, 100vw"
-                            priority
+                            priority={index === 0}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent" />
                         </>
