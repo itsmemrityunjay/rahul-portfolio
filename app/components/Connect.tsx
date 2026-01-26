@@ -1,8 +1,9 @@
 import FloatingLines from '@/components/FloatingLines';
+import Link from 'next/link';
 
 export default function Connect() {
   return (
-    <div style={{ width: '100%', height: '800px', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+    <div id="contact" style={{ width: '100%', height: '800px', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
       <FloatingLines
         enabledWaves={["top", "middle", "bottom"]}
         // Array - specify line count per wave; Number - same count for all waves
@@ -15,24 +16,19 @@ export default function Connect() {
         parallax={true}
       />
       <div style={{ position: 'absolute', zIndex: 10, textAlign: 'center' }}>
-        <h2 style={{ fontSize: '3.5rem', fontWeight: 'bold', color: 'white', marginBottom: '2rem' }}>
-          That's All, Folks! Intrigued?
+        <h2 style={{ fontSize: '3.5rem', fontWeight: 'bold', color: 'white', marginBottom: '2rem', fontFamily: 'serif' }}>
+          That’s it for now. Curious to know more?
         </h2>
-        <button style={{
-          padding: '1rem 2.5rem',
-          fontSize: '1.5rem',
-          border: '2px solid white',
-          borderRadius: '50px',
-          backgroundColor: 'transparent',
-          color: 'white',
-          cursor: 'pointer',
-          transition: 'all 0.3s ease',
-          fontWeight: '500'
-        }}>
-          Let's Connect →
-        </button>
-        <p style={{ fontSize: '1rem', color: '#999', marginTop: '2rem', maxWidth: '600px' }}>
-          Warning: Getting your designs done from me might result in an overload of compliments & growth. Please proceed with caution.
+        <Link
+          href="mailto:rahuldhiman4441@gmail.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block px-10 py-4 text-xl border-2 border-white rounded-[50px] bg-transparent text-white font-medium transition-all duration-300 hover:bg-[#ff6445] hover:text-white hover:border-0"
+        >
+          Let’s connect →
+        </Link>
+        <p className="mt-8 max-w-[600px] text-base text-white text-center mx-auto">
+          I’d love to chat about design, ideas, or potential collaborations.
         </p>
       </div>
     </div>

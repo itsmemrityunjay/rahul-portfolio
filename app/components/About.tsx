@@ -41,9 +41,9 @@ export default function About() {
       <div className="w-full">
         {/* Hello! Heading */}
         <div className={`flex items-center justify-center gap-8 mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="flex-1 h-[1px] bg-gray-700"></div>
-          <h2 className="text-4xl lg:text-5xl font-serif italic text-gray-300">About me!</h2>
-          <div className="flex-1 h-[1px] bg-gray-700"></div>
+          
+          <h2 className="text-4xl lg:text-5xl font-serif text-gray-300">About me!</h2>
+         
         </div>
 
         {/* Main Content with Floating Badges */}
@@ -148,7 +148,7 @@ export default function About() {
   baseRotation={0}
   blurStrength={4}
 >
-            I’m a UI/UX Designer  who loves creating clean and meaningful digital experiences. I enjoy breaking down messy problems, understanding user needs, and designing solutions that actually make sense. I care about both how a product looks and how it works, and I’m always curious to learn and improve.
+            I’m a UI/UX designer who enjoys making things clearer. I like digging into messy problems, listening to users, and designing solutions that feel simple and purposeful. I care about how a product looks, how it works, and how it feels to use I’m always learning along the way
 
 
             </ScrollReveal>

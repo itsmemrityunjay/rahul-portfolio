@@ -13,14 +13,11 @@ import Footer from "./components/Footer";
 
 export default function Home() {
   useEffect(() => {
-    // Initialize Lenis
+    // Initialize Lenis with disabled state so it doesn't interfere with Showcase scroll
     const lenis = new Lenis({
       autoRaf: true,
-    });
-
-    // Listen for the scroll event and log the event data
-    lenis.on('scroll', (e) => {
-      console.log(e);
+      lerp: 0.1, // Smooth scrolling factor
+      wheelMultiplier: 1,
     });
 
     // Cleanup function

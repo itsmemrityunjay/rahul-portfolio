@@ -1,32 +1,32 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
+import ReactLenis from 'lenis/react';
 
 const workItems = [
   {
     id: 1,
-    title: 'COLOR MATERIAL FINISH',
+    title: 'Design Project',
     image: '/work1.jpg',
-    alt: 'VR Headsets showcasing color, material, and finish variations'
+    alt: ''
   },
   {
     id: 2,
-    title: 'Minimalism',
+    title: 'Interaction Design',
     image: '/work2.jpg',
-    alt: 'Minimalism design with color palette'
+    alt: ''
   },
   {
     id: 3,
-    title: 'Unacademy',
+    title: 'Information & Data Design',
     image: '/work3.jpg',
-    alt: 'Unacademy brand design'
+    alt: ''
   },
   {
     id: 4,
-    title: 'Everest Masala',
+    title: 'Speculative Design',
     image: '/work4.jpg',
-    alt: 'Everest Masala product packaging'
+    alt: ''
   },
 ];
 
@@ -152,20 +152,28 @@ export default function Work() {
   };
 
   return (
-    <section 
-      ref={sectionRef}
-      className="relative bg-black text-white"
-      style={{ minHeight: '300vh' }}
-    >
-      <div className="sticky top-0 h-screen overflow-hidden flex items-center justify-center">
+    <ReactLenis root>
+      <section 
+        ref={sectionRef}
+        className="relative bg-black text-white"
+        style={{ minHeight: '300vh' }}
+      >
+        <div className="sticky top-0 h-screen overflow-hidden flex items-center justify-center">
         {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-radial from-gray-900 via-black to-black opacity-50" />
+        <div className="absolute inset-0 bg-gradient-radial from-[#ff6445] via-black to-[#ff6445] opacity-50" />
         
         {/* Work Cards */}
         <div className="relative w-full h-full flex items-center justify-center">
           {workItems.map((item, index) => {
             const transform = getCardTransform(index);
-            
+            const palette = [
+              { bg: 'bg-[#ffff]', text: 'text-black', accent: 'text-black/70', border: 'border-black/10' }, // card 1 gray
+              { bg: 'bg-[#66388e]', text: 'text-[#ffff]', accent: 'text-[#fffff]/80', border: 'border-[#ff6445]/20' }, // card 2 white
+              { bg: 'bg-[#3b68ff]', text: 'text-white', accent: 'text-white/80', border: 'border-white/20' }, // card 3 blue
+              { bg: 'bg-[#ffff]', text: 'text-black', accent: 'text-black/80', border: 'border-[#ff6445]/20' }, // card 4 white
+            ];
+            const { bg: cardBg, text: cardText, accent: accentText, border: borderColor } = palette[index] || palette[0];
+
             return (
               <div
                 key={item.id}
@@ -177,17 +185,14 @@ export default function Work() {
                   willChange: 'transform, opacity',
                 }}
               >
-                <div className="relative w-full h-full overflow-hidden bg-white shadow-2xl">
-                  <Image
-                    src={item.image}
-                    alt={item.alt}
-                    fill
-                    className="object-cover"
-                    sizes="40vw"
-                    priority
-                  />
-                  {/* Overlay for better text contrast if needed */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                <div
+                  className={`relative w-full h-full overflow-hidden  ${cardBg} ${borderColor}  shadow-2xl px-6 py-8 flex flex-col justify-end transition-colors duration-300`}
+                >
+                  <div className="flex flex-col gap-2">
+                    <span className={`text-sm uppercase tracking-[0.2em] ${accentText}`}>Featured Work</span>
+                    <h3 className={`text-3xl font-semibold leading-tight ${cardText}`}>{item.title}</h3>
+                    <p className={`text-base leading-relaxed ${accentText}`}>{item.alt || ' '}</p>
+                  </div>
                 </div>
               </div>
             );
@@ -203,14 +208,14 @@ export default function Work() {
             transition: 'none', // RAF handles smoothness
           }}
         >
-          <h2 className="text-7xl md:text-8xl lg:text-9xl font-serif mb-6 text-white text-center leading-tight">
-            There&apos;s<br />More
+          <h2 className="text-7xl md:text-7xl lg:text-7xl font-serif mb-6 text-white text-center leading-tight">
+          Still Scrolling?
           </h2>
           <a 
             href="#archive" 
             className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors pointer-events-auto group mt-4"
           >
-            <span className="text-lg">Check out the Archive</span>
+            <span className="text-lg">There’s more inside </span>
             <svg 
               width="20" 
               height="20" 
@@ -224,7 +229,8 @@ export default function Work() {
             </svg>
           </a>
         </div>
-      </div>
-    </section>
+        </div>
+      </section>
+    </ReactLenis>
   );
 }

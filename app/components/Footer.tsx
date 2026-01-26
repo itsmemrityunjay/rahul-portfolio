@@ -1,4 +1,7 @@
 import Image from 'next/image';
+import LinkedIN from '@/public/linkedin.png';
+import Mail from '@/public/mail.png';
+import Link from 'next/link';
 
 const iconStroke = '#ffffff';
 
@@ -75,14 +78,21 @@ export default function Footer() {
               <span className="text-lg font-semibold">Find me at:</span>
             </div>
             <div className="flex items-center gap-6">
-              <LinkedinIcon />
+              <Link href="https://www.linkedin.com/in/rahul-dhiman-3418752b4/" target="_blank" rel="noopener noreferrer">
+              <Image src={LinkedIN} alt="" className='max-w-10'/>
+              </Link>
+              
+              <Link href="mailto:rahuldhiman4441@gmail.com" target="_blank" rel="noopener noreferrer">
+              <Image src={Mail} alt="" className='max-w-10'/>
+              </Link>
+              {/* <LinkedinIcon />
               <XIcon />
-              <InstagramIcon />
+              <InstagramIcon /> */}
             </div>
 
             <div className="text-left text-lg leading-8 text-[#f3f3f3] pt-4 md:pt-8">
-              <p>Thank you for visiting my portfolio!</p>
-              <p>It has been Designed &amp; Developed by me with Love &lt;3</p>
+              <p>Thanks for taking the time to explore my work.</p>
+              <p>Designed by me and refined with care.</p>
             </div>
           </div>
 

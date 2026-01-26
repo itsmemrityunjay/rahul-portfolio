@@ -9,6 +9,8 @@ import Noise from '@/components/Noise'
 export default function Hero() {
   const [text, setText] = useState('RAHUL DHIMAN');
   const [isInAboutSection, setIsInAboutSection] = useState(false);
+  const [activeTab, setActiveTab] = useState('contact');
+  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
   const finalText = 'RAHUL DHIMAN   ';
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_+-=[]{}|;:,.<>?';
 
@@ -49,6 +51,25 @@ export default function Hero() {
         // Check if about section is in viewport (top of section is above middle of screen)
         setIsInAboutSection(rect.top < window.innerHeight / 2 && rect.bottom > 0);
       }
+
+      // Track active tab based on scroll position
+      const sections = [
+        { id: 'about', label: 'about' },
+        { id: 'projects', label: 'projects' },
+        { id: 'resume', label: 'resume' },
+        { id: 'contact', label: 'contact' },
+      ];
+
+      for (const section of sections) {
+        const element = document.getElementById(section.id);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          if (rect.top < window.innerHeight / 2 && rect.bottom > 0) {
+            setActiveTab(section.label);
+            break;
+          }
+        }
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -83,7 +104,7 @@ export default function Hero() {
       
       {/* Navigation */}
       <nav className={`fixed top-0 w-full z-50 px-4 sm:px-8 lg:px-16 py-4 sm:py-6 flex justify-between items-center transition-all duration-300 ${isInAboutSection ? 'bg-black' : 'bg-transparent'}`}>
-        <div className="flex items-center nav-logo-float">
+        <button onClick={() => { setActiveTab('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center nav-logo-float cursor-pointer hover:opacity-80 transition-opacity">
           <Image
             src="/rahul1.png"
             alt="Rahul logo"
@@ -92,20 +113,20 @@ export default function Hero() {
             className="h-12 w-12 rounded-full object-contain"
             priority
           />
-        </div>
+        </button>
         <div className="hidden md:flex items-center gap-4 lg:gap-8">
-          <a href="#projects" className="text-gray-300 hover:text-white transition-colors text-sm lg:text-base">
-            Projects
-          </a>
-          <a href="#resume" className="text-gray-300 hover:text-white transition-colors text-sm lg:text-base">
-            Resume
-          </a>
-          <a href="#about" className="text-gray-300 hover:text-white transition-colors text-sm lg:text-base">
+          <a href="#about" onClick={() => setActiveTab('about')} className={`transition-colors text-sm lg:text-base uppercase ${activeTab === 'about' ? 'text-white font-semibold' : 'text-gray-300 hover:text-white'}`}>
             About me
           </a>
-          <button className="bg-[#FF6B4A] hover:bg-[#ff5533] px-6 lg:px-8 py-2 lg:py-3 rounded-full transition-colors text-sm lg:text-base">
-            CONTACT
-          </button>
+          <a href="#projects" onClick={() => setActiveTab('projects')} className={`transition-colors text-sm lg:text-base uppercase ${activeTab === 'projects' ? 'text-white font-semibold' : 'text-gray-300 hover:text-white'}`}>
+            Projects
+          </a>
+          <a href="#resume" onClick={(e) => { e.preventDefault(); setActiveTab('resume'); setIsResumeModalOpen(true); }} className={`transition-colors text-sm lg:text-base uppercase ${activeTab === 'resume' ? 'text-white font-semibold' : 'text-gray-300 hover:text-white'}`}>
+            Resume
+          </a>
+          <a href="#contact" onClick={() => setActiveTab('contact')} className={`transition-colors text-sm lg:text-base uppercase ${activeTab === 'contact' ? 'text-white font-semibold' : 'text-gray-300 hover:text-white'}`}>
+            Contact
+          </a>
         </div>
         {/* Mobile menu button */}
         <button className="md:hidden text-white">
@@ -119,7 +140,7 @@ export default function Hero() {
       <div className="relative z-20 flex items-center justify-center min-h-screen px-4 sm:px-8 lg:px-16">
         <div className="relative w-full max-w-[1400px]">
           {/* Small intro text */}
-          <div className="absolute top-[-10px] sm:top-[-20px] left-0 text-[#FF6B4A] text-xs sm:text-sm lg:text-base font-medium">
+          <div className="absolute top-[-10px] sm:top-[-20px] left-5 text-[#FF6B4A] text-xs sm:text-sm lg:text-base font-medium">
             (HELLO! I&apos;M RAHUL)
           </div>
 
@@ -151,16 +172,42 @@ export default function Hero() {
 
 
           {/* Passionate text */}
-          <div className="absolute bottom-[-30px] sm:bottom-[-40px] right-0 text-[#FF6B4A] text-xs sm:text-sm lg:text-base font-medium text-right">
-            I&apos;M DEEPLY PASSIONATE ABOUT DESIGN
+          <div className="absolute bottom-[-30px] sm:bottom-[-40px] uppercase right-5 text-[#FF6B4A] text-xs sm:text-sm lg:text-base font-medium text-right">
+            (Design, for me, is about clarity and impact)
           </div>
         </div>
       </div>
 
       {/* Bottom elements */}
  
-      
       </div>
+
+      {/* Resume Modal */}
+      {isResumeModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-black border border-white/20 rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-auto">
+            <div className="sticky top-0 bg-black border-b border-white/20 p-4 flex justify-between items-center">
+              <h3 className="text-white text-lg font-semibold">Resume</h3>
+              <button
+                onClick={() => setIsResumeModalOpen(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+            <div className="w-full h-[calc(90vh-70px)]">
+              <iframe
+                src="/resume.pdf"
+                className="w-full h-full"
+                title="Resume"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+      
 
       <style jsx>{`
         .nav-logo-float {
