@@ -266,35 +266,43 @@ export default function Showcase() {
             // Center offset will depend on final card height from aspect ratio
             cardY = 100 - 85 * easedProgress;
             cardOpacity = 1;
-            // Scale down content from 1.15 to 1.0 to maintain aspect ratio
-            contentScale = 1.15 - (0.15 * easedProgress);
+            // Smooth scale down from 1.15 to 1.0 with gentler easing for better scroll sync
+            const scaleEase = t * t; // Quadratic for smoother feel
+            contentScale = 1.15 - (0.15 * scaleEase);
           } else {
             // Card at center - centered vertically
             cardY = 15;
             contentScale = 1.0; // Final scale at center
             
-            // Slow, gradual fade starting much earlier
-            // Fade begins at 70% through current card's section for slower transition
-            const fadeStartPoint = 0.7;
+              // Last card never fades - remains solid
+              const isLastCard = index === totalCards - 1;
             
-            if (cardLocalProgress >= fadeStartPoint) {
-              // Fade within current card's own timeline
-              const t = (cardLocalProgress - fadeStartPoint) / (1 - fadeStartPoint);
-              // Softer cubic easing for smooth, gentle fade
-              const easedFade = t * t * t;
-              // Fade from 100% to 75% opacity only (never below 75%)
-              cardOpacity = 1 - (easedFade * 0.25);
-            } else {
-              cardOpacity = 1;
-            }
+              if (isLastCard) {
+                // Keep last card fully solid
+                cardOpacity = 1;
+              } else {
+                // Slow, gradual fade starting much earlier
+                // Fade begins at 70% through current card's section for slower transition
+                const fadeStartPoint = 0.7;
+              
+                if (cardLocalProgress >= fadeStartPoint) {
+                  // Fade within current card's own timeline
+                  const t = (cardLocalProgress - fadeStartPoint) / (1 - fadeStartPoint);
+                  // Softer cubic easing for smooth, gentle fade
+                  const easedFade = t * t * t;
+                  // Fade from 100% to 80% opacity only (never below 80%)
+                  cardOpacity = Math.max(0.8, 1 - (easedFade * 0.2));
+                } else {
+                  cardOpacity = 1;
+                }
+              }
           }
           
           // Width animation starts early and completes as card reaches center
           const shrinkStart = -0.15; // Start shrinking even earlier before card appears
           const shrinkEnd = 0.4; // Complete shrinking earlier
           
-          // Only render if card has some visibility
-          if (cardLocalProgress < -0.1 || cardOpacity <= 0) return null;
+          // Keep all cards rendered (only fade, never disappear)
 
           // PHASE-BASED WIDTH ANIMATION (shrinks as card enters)
           const finalWidthPercent = 85; // Target final width: 85%
