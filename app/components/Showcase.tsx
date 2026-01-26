@@ -53,6 +53,7 @@ const StickyCard = ({ index, project, progress }: StickyCardProps) => {
   // For 3rd card (index 2), use higher offset of 252
   const baseOffset = useTransform(progress, [0, 0.5, 1], index === 2 ? [852, 152, 0] : [382, 12, 0]);
   const topValue = useTransform(baseOffset, (offset) => `calc(50vh - ${520 / 2}px + ${index * offset}px)`);
+  const isFirstCard = index === 0;
   
   // Sequential appearance: each card appears only after previous card reaches final state
   // Card 0: appears at progress 0
@@ -83,7 +84,7 @@ const StickyCard = ({ index, project, progress }: StickyCardProps) => {
                   fill
                   className="object-cover"
                   sizes="(min-width: 868px) 55vw, 100vw"
-                  priority={index === 0}
+                  priority={isFirstCard}
                 />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
               </div>
@@ -147,7 +148,7 @@ const StickyCard = ({ index, project, progress }: StickyCardProps) => {
                   fill
                   className="object-cover"
                   sizes="(min-width: 868px) 55vw, 100vw"
-                  priority={index === 0}
+                  priority={isFirstCard}
                 />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
               </div>

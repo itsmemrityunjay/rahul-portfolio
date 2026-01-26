@@ -6,7 +6,6 @@ import TechStack from "./components/TechStack";
 import About from "./components/About";
 import Showcase from "./components/Showcase";
 import Work from "./components/Work";
-import StackCard from "./components/StackCard";
 import Lenis from 'lenis'
 import Connect from "./components/Connect";
 import Footer from "./components/Footer";

@@ -33,7 +33,7 @@ const workItems = [
 export default function Work() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const rafRef = useRef<number>();
+  const rafRef = useRef<number | null>(null);
   const targetProgressRef = useRef(0);
   const currentProgressRef = useRef(0);
 
@@ -66,7 +66,7 @@ export default function Work() {
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     };
   }, []);
 
